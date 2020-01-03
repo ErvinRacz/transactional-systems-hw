@@ -1,9 +1,13 @@
 package app.parser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -51,23 +55,45 @@ public class ScheduleParser {
     }
 
     public List<Operation> parse(String schedule) {
-        if (StringUtils.isBlank(schedule))
+        if (StringUtils.isBlank(schedule)) {
             throw new ScheduleParserException("The schedule must not be empty.");
+        }
 
         List<String> operations = Arrays.asList(schedule.split(delimiter + ""));
-        if (operations.size() < 2)
+        if (operations.size() < 2) {
             throw new ScheduleParserException("The schedule must contain at least two operations.");
+        }
 
-        if ((operations.size() - 1) != StringUtils.countMatches(schedule, delimiter))
+        if ((operations.size() - 1) != StringUtils.countMatches(schedule, delimiter)) {
             throw new ScheduleParserException("Syntax error in the user provided schedule.");
+        }
 
-        if (operations.stream().anyMatch(e -> e.length() != 3))
+        if (operations.stream().anyMatch(e -> e.length() != 3)) {
             throw new ScheduleParserException("Operation has to be constructed of three characters.");
+        }
 
         Function<String, Operation> operationBinder = (strOp) -> new Operation(dictionary.get(strOp.substring(0, 1)),
                 new SymbolicData(strOp.substring(2, 3)), new Transaction(strOp.substring(1, 2)));
 
         return operations.stream().map(strOp -> operationBinder.apply(strOp)).collect(Collectors.toList());
+    }
+
+    /**
+     * Defines a set of transactions by keeping the order of their occurance in the
+     * schedule.
+     * 
+     * @param schedule - list of operations
+     * @return - Sets don't ensure consistent ordering of the elements, thus we need
+     *         to return a list
+     */
+    public static List<Transaction> extractTransactions(Collection<? extends Operation> schedule) {
+        Set<Transaction> transactionSet = new HashSet<>();
+        List<Transaction> transactionList = new ArrayList<>();
+        schedule.forEach(op -> {
+            if (transactionSet.add(op.getTransaction()))
+                transactionList.add(op.getTransaction());
+        });
+        return transactionList;
     }
 
     // #region Getters and Setters

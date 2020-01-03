@@ -82,4 +82,5 @@ public class Operation implements Serializable {
         this.transaction = transaction;
     }
     // #endregion
+
 }
