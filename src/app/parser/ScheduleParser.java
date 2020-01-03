@@ -45,15 +45,28 @@ public class ScheduleParser {
 
     private char delimiter;
 
+    /**
+     * Create a ScheduleParser with default delimiter, which is a space character.
+     */
     public ScheduleParser() {
         super();
+        delimiter = ' ';
     }
 
+    /**
+     * @param delimiter - separates the operations
+     */
     public ScheduleParser(char delimiter) {
         super();
         this.setDelimiter(delimiter);
     }
 
+    /**
+     * TODO: provide description
+     * 
+     * @param schedule
+     * @return
+     */
     public List<Operation> parse(String schedule) {
         if (StringUtils.isBlank(schedule)) {
             throw new ScheduleParserException("The schedule must not be empty.");
