@@ -9,7 +9,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         var parser = new ScheduleParser(' ');
-        parser.parse(s1);
+        System.out.println(parser.parse(s1));
         parser.parse(s2);
     }
 }

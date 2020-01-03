@@ -3,6 +3,9 @@ package app.models;
 import java.io.Serializable;
 import java.util.Objects;
 
+import app.models.operands.SymbolicData;
+import app.models.operands.Transaction;
+
 public class Operation implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -11,8 +14,8 @@ public class Operation implements Serializable {
     }
 
     private Type type;
-    private Operand operand;
-    private Operand transaction;
+    private SymbolicData operand;
+    private Transaction transaction;
 
     public Operation() {
         super();
@@ -23,7 +26,7 @@ public class Operation implements Serializable {
      * @param Operand operand - the subject of an operation
      * @param Operand transaction - that the operation is being part of
      */
-    public Operation(Type type, Operand operand, Operand transaction) {
+    public Operation(Type type, SymbolicData operand, Transaction transaction) {
         super();
         this.setType(type);
         this.setOperand(operand);
@@ -47,6 +50,11 @@ public class Operation implements Serializable {
     public int hashCode() {
         return Objects.hash(type, operand, transaction);
     }
+
+    @Override
+    public String toString() {
+        return "{" + getType().toString().charAt(0) + "" + getTransaction() + "" + getOperand() + "}";
+    }
     // #endregion
 
     // #region Getters and Setters
@@ -58,19 +66,19 @@ public class Operation implements Serializable {
         this.type = type;
     }
 
-    public Operand getOperand() {
-        return operand;
+    public SymbolicData getOperand() {
+        return this.operand;
     }
 
-    public void setOperand(Operand operand) {
+    public void setOperand(SymbolicData operand) {
         this.operand = operand;
     }
 
-    public Operand getTransaction() {
-        return transaction;
+    public Transaction getTransaction() {
+        return this.transaction;
     }
 
-    public void setTransaction(Operand transaction) {
+    public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
     }
     // #endregion
