@@ -8,16 +8,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import app.models.Operation;
+import app.assessor.*;
 import app.parser.ScheduleParser;
 
 public class App {
 
-    private static String s1 = "r1x r1y w1y";
     private static String s2 = "r1x w1y w1x r3z w3z r2y r2x w2z";
 
     public static void main(String[] args) throws Exception {
         var parser = new ScheduleParser(' ');
-        var schedule = parser.parse(s1);
+        var schedule = parser.parse(s2);
 
         if (schedule.size() < 2) {
             throw new RuntimeException("The schedule has to contain at least two operations.");
@@ -37,12 +37,12 @@ public class App {
 
         final List<List<Operation>> generatedSchedules = new ArrayList<>();
         Function<List<Operation>, Boolean> delegate = (s) -> {
-            //generatedSchedules.add(s);
-            // System.out.println(s);
+            var assessor = new Assessor(s);
+            System.out.println(assessor.getStepGraph().toString());
             return true;
         };
 
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(6);
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
 
         var startTime = System.nanoTime();
         for (int i = 0; i < schedule.size(); i++) {
@@ -61,8 +61,7 @@ public class App {
         executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
         var endTime = System.nanoTime();
 
-        int cores = Runtime.getRuntime().availableProcessors();
-        System.out.println("Cores: " + cores + "\nEx. time (ms): " + (endTime - startTime) / 1000000f
-                + "\nNr. of schedules: " + generatedSchedules.size());
+        System.out.println("Ex. time (ms): " + (endTime - startTime) / 1000000f + "\nNr. of schedules: "
+                + generatedSchedules.size());
     }
 }

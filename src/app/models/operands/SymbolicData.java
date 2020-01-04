@@ -1,6 +1,7 @@
 package app.models.operands;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public final class SymbolicData extends Operand {
@@ -25,5 +26,21 @@ public final class SymbolicData extends Operand {
         if (!suggestedNames.contains(name))
             throw new RuntimeException(
                     "Symbol can be created only with the following names: " + suggestedNames.toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Operand)) {
+            return false;
+        }
+        Operand operand = (Operand) o;
+        return Objects.equals(getSymbol(), operand.getSymbol()) && Objects.equals(getType(), operand.getType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSymbol(), getType());
     }
 }
