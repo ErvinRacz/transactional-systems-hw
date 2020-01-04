@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -56,11 +57,12 @@ public class Assessor {
         symbolicDataSet.forEach(data -> {
             g.addVertex(new Operation(Operation.Type.WRITE, data, new Transaction("0")));
             var read = new Operation(Operation.Type.READ, data, new Transaction("oo"));
+            read.setLive(true);
             g.addVertex(read);
             schedule.add(read);
         });
 
-        for (int i = schedule.size() - 1; i >= 0; i--) {
+        for (int i = schedule.size() - 1; i >= 1; i--) {
             if (schedule.get(i).getType() == Operation.Type.READ) {
                 for (int j = i - 1; j >= 0; j--) {
                     if (schedule.get(j).getType() == Operation.Type.WRITE
@@ -88,11 +90,15 @@ public class Assessor {
     }
 
     private void findLiveOperations() {
-        schedule.subList(schedule.size() - 1 - symbolicDataSet.size(), schedule.size()).forEach(finalOp -> {
-            Iterator<Operation> iterator = new DepthFirstIterator<>(stepGraph, finalOp);
-            while (iterator.hasNext()) {
-                iterator.next().setLive(true);
-            }
+        schedule.subList(schedule.size() - symbolicDataSet.size(), schedule.size()).forEach(finalOp -> {
+            var pathfinder = new DijkstraShortestPath<>(stepGraph);
+            var paths = pathfinder.getPaths(finalOp);
+            schedule.subList(0, schedule.size() - symbolicDataSet.size()).forEach(op -> {
+                var path = paths.getPath(op);
+                if (path != null && path.getLength() > 0) {
+                    op.setLive(true);
+                }
+            });
         });
     }
 

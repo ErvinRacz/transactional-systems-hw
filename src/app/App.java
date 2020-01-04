@@ -40,7 +40,7 @@ public class App {
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var assessor = new Assessor(s);
             assessor.createLiveReadFromRelationList();
-            System.out.println(s + "--" + assessor.getLiveReadFromRealations().toString());
+            // System.out.println(s + "--" + assessor.getLiveReadFromRealations().toString());
             return true;
         };
 
