@@ -1,6 +1,7 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -13,7 +14,7 @@ import app.parser.ScheduleParser;
 
 public class App {
 
-    private static String s2 = "r1x w1y w1x r3z w3z r2y r2x w2z";
+    private static String s2 = "r1x w1y r2y w2y";
 
     public static void main(String[] args) throws Exception {
         var parser = new ScheduleParser(' ');
@@ -38,7 +39,8 @@ public class App {
         final List<List<Operation>> generatedSchedules = new ArrayList<>();
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var assessor = new Assessor(s);
-            System.out.println(assessor.getStepGraph().toString());
+            assessor.createLiveReadFromRelationList();
+            System.out.println(s + "--" + assessor.getLiveReadFromRealations().toString());
             return true;
         };
 
@@ -49,10 +51,12 @@ public class App {
             PermutationProvider.swap(schedule, 0, i);
 
             var permutationProvider = new PermutationProvider<Operation>(true, delegate);
-            permutationProvider.setElements(schedule.subList(1, schedule.size()));
+            // Sublist returns the subpart of the original list which remains mutable.
+            // It is not thread safe if we don't pass a new copy of the list.
+            permutationProvider.setElements(new LinkedList<>(schedule.subList(1, schedule.size())));
             permutationProvider.setNrOfElements(schedule.size() - 1);
             permutationProvider.setIgnoredElement(schedule.get(0));
-
+            // permutationProvider.run();
             executor.execute(permutationProvider);
 
             PermutationProvider.swap(schedule, i, 0);

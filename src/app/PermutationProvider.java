@@ -31,7 +31,7 @@ class PermutationProvider<T> implements Runnable {
             if (ignoredElement != null) {
                 e.addFirst(ignoredElement);
             }
-            delegate.apply(e);
+            delegate.apply(new LinkedList<>(e));
             e.removeFirst();
         } else {
             for (int i = 0; i < n - 1; i++) {
@@ -51,10 +51,10 @@ class PermutationProvider<T> implements Runnable {
         if (isIgnoreElement()) {
             // We don't want to return the same list reference at each time, therefore
             // create a new list as soon as we have a permutation.
-            permutateIgnoringFirst(nrOfElements, new LinkedList<>(elements), this.ignoredElement);
+            permutateIgnoringFirst(nrOfElements, (LinkedList<T>) elements, this.ignoredElement);
         } else {
             // same as above here
-            permutate(nrOfElements, new LinkedList<>(elements));
+            permutate(nrOfElements, (LinkedList<T>) elements);
         }
     }
 

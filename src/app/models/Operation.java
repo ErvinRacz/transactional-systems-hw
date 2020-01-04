@@ -16,6 +16,7 @@ public class Operation implements Serializable {
     private Type type;
     private SymbolicData operand;
     private Transaction transaction;
+    private boolean live;
 
     public Operation() {
         super();
@@ -80,6 +81,14 @@ public class Operation implements Serializable {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
     }
     // #endregion
 
