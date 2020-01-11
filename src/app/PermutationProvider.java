@@ -11,7 +11,7 @@ import java.util.function.Function;
  * represents an interface through which the user can define further operations
  * to be done on the permutations.
  */
-class PermutationProvider<T> implements Runnable {
+public class PermutationProvider<T> implements Runnable {
 
     private Function<List<T>, Boolean> delegate;
     private boolean ignoreFirstElement;
@@ -39,7 +39,9 @@ class PermutationProvider<T> implements Runnable {
                 e.addFirst(ignoredElement);
             }
             delegate.apply(new LinkedList<>(e));
-            e.removeFirst();
+            if (ignoredElement != null) {
+                e.removeFirst();
+            }
         } else {
             for (int i = 0; i < n - 1; i++) {
                 permutateIgnoringFirst(n - 1, e, ignoredElement);

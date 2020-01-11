@@ -69,12 +69,18 @@ public class App {
         if (!schedule.equals(serialSchedule)) {
             throw new RuntimeException("The schedule has to be provided in a serial form.");
         }
-        
+
+        var serialSchedules = ScheduleParser.getAllSerialSchedules(schedule);
+
         // #endregion
 
         var assessor = new Assessor(new ArrayList<Operation>(schedule));
         assessor.createLiveReadFromRelationList();
         assessor.createReadFromRelationList();
+
+        var assessors = serialSchedules.stream().map(s -> new Assessor(new ArrayList<Operation>(s)))
+                .collect(Collectors.toList());
+
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var a = new Assessor(new ArrayList<Operation>(s));
             a.createReadFromRelationList();

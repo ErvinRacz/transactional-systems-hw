@@ -5,14 +5,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.PermutationProvider;
 import app.models.Operation;
 import app.models.operands.SymbolicData;
 import app.models.operands.Transaction;
@@ -98,7 +102,7 @@ public class ScheduleParser {
      * @return - Sets don't ensure consistent ordering of the elements, thus we need
      *         to return a list
      */
-    public static List<Transaction> extractTransactions(Collection<? extends Operation> schedule) {
+    public static List<Transaction> extractTransactions(List<Operation> schedule) {
         Set<Transaction> transactionSet = new HashSet<>();
         List<Transaction> transactionList = new ArrayList<>();
         schedule.forEach(op -> {
@@ -106,6 +110,24 @@ public class ScheduleParser {
                 transactionList.add(op.getTransaction());
         });
         return transactionList;
+    }
+
+    public static Set<List<Operation>> getAllSerialSchedules(List<Operation> schedule) {
+        var serialSchedulesSet = new HashSet<List<Operation>>();
+        var serialSchedule = ScheduleParser.extractTransactions(schedule).stream()
+                .map(tr -> schedule.stream().filter(op -> op.getTransaction().equals(tr)).collect(Collectors.toList())).collect(Collectors.toCollection(LinkedList::new));
+
+        Function<List<List<Operation>>, Boolean> delegate = (p) -> {
+            serialSchedulesSet.add(p.stream().flatMap(List::stream).collect(Collectors.toList()));
+            return true;
+        };
+
+        var permutationProvider = new PermutationProvider<List<Operation>>(false, delegate);
+        permutationProvider.setElements(serialSchedule);
+        permutationProvider.setNrOfElements(serialSchedule.size());
+        permutationProvider.run();
+
+        return serialSchedulesSet;
     }
 
     // #region Getters and Setters
