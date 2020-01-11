@@ -7,55 +7,48 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
+import app.assessor.Assessor;
 import app.models.Operation;
 import app.models.operands.Operand;
 import app.models.operands.SymbolicData;
 
 /**
- * Verifies a schedule in regards of view equivalency. Provide the read
- * from relation set of the first schedule through the constructor for the
+ * Verifies a schedule in regards of view equivalency. Provide the read from
+ * relation set of the first schedule through the constructor for the
  * comparison.
  */
 public class VSR implements Aspect {
 
-    private List<Operation> scheduleCompareTo;
-    private List<Triple<Operand, String, Operand>> lrfCompareTo;
+    private List<Assessor> assessors;
 
     /**
-     * Provide the read from relation set of the first schedule through the
-     * constructor for the comparison.
-     * 
      * @param scheduleCompareTo
      * @param rfCompareTo
      */
-    public VSR(List<Operation> scheduleCompareTo, List<Triple<Operand, String, Operand>> rfCompareTo) {
-        this.scheduleCompareTo = scheduleCompareTo;
-        this.lrfCompareTo = rfCompareTo;
+    public VSR(List<Assessor> compareToAssessors) {
+        this.assessors = compareToAssessors;
     }
 
     @Override
     public boolean assess(List<Operation> schedule, Graph<Operation, DefaultEdge> stepGraph,
             List<Triple<Operand, String, Operand>> rfSecond, Set<SymbolicData> symbolicDataSet) {
-        return scheduleCompareTo.size() == schedule.size() && lrfCompareTo.size() == rfSecond.size()
-                && lrfCompareTo.containsAll(rfSecond);
+        for (Assessor a : assessors) {
+            if (a.getSchedule().size() == schedule.size() && a.getLiveReadFromRealations().size() == rfSecond.size()
+                    && a.getLiveReadFromRealations().containsAll(rfSecond))
+                return true;
+        }
+        return false;
     }
 
     // #region Getters and setters
 
-    public List<Triple<Operand, String, Operand>> getRfFirst() {
-        return this.lrfCompareTo;
+    public List<Assessor> getAssessors() {
+        return this.assessors;
     }
 
-    public void setRfFirst(List<Triple<Operand, String, Operand>> lrfFirst) {
-        this.lrfCompareTo = lrfFirst;
+    public void setAssessors(List<Assessor> assessors) {
+        this.assessors = assessors;
     }
 
-    public List<Operation> getScheduleFirst() {
-        return this.scheduleCompareTo;
-    }
-
-    public void setScheduleFirst(List<Operation> scheduleFirst) {
-        this.scheduleCompareTo = scheduleFirst;
-    }
     // #endregion
 }

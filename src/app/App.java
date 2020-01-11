@@ -73,13 +73,13 @@ public class App {
         var serialSchedules = ScheduleParser.getAllSerialSchedules(schedule);
 
         // #endregion
-
-        var assessor = new Assessor(new ArrayList<Operation>(schedule));
-        assessor.createLiveReadFromRelationList();
-        assessor.createReadFromRelationList();
-
-        var assessors = serialSchedules.stream().map(s -> new Assessor(new ArrayList<Operation>(s)))
+        var serialSchedulesAssessors = serialSchedules.stream().map(s -> new Assessor(new ArrayList<Operation>(s)))
                 .collect(Collectors.toList());
+
+        serialSchedulesAssessors.forEach(a -> {
+            a.createLiveReadFromRelationList();
+            a.createReadFromRelationList();
+        });
 
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var a = new Assessor(new ArrayList<Operation>(s));
