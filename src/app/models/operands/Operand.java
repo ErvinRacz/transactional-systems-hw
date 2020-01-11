@@ -19,11 +19,11 @@ public abstract class Operand implements Serializable, Comparable<Operand> {
 
     /**
      * @param type   - type of the operand
-     * @param symbol - name of the operand
+     * @param name - name of the operand
      */
-    public Operand(Type type, String symbol) {
+    public Operand(Type type, String name) {
         super();
-        this.setName(symbol);
+        this.setName(name);
         this.setType(type);
     }
 
@@ -46,12 +46,12 @@ public abstract class Operand implements Serializable, Comparable<Operand> {
 
     @Override
     public int compareTo(Operand other) {
-        return getSymbol().compareTo(other.getSymbol());
+        return getName().compareTo(other.getName());
     }
 
     @Override
     public String toString() {
-        return getSymbol();
+        return getName();
     }
 
     // #endregion
@@ -69,7 +69,7 @@ public abstract class Operand implements Serializable, Comparable<Operand> {
         this.name = symbol;
     }
 
-    public String getSymbol() {
+    public String getName() {
         return this.name;
     }
     // #endregion

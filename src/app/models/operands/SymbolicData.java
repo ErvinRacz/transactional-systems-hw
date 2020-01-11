@@ -36,11 +36,11 @@ public final class SymbolicData extends Operand {
             return false;
         }
         Operand operand = (Operand) o;
-        return Objects.equals(getSymbol(), operand.getSymbol()) && Objects.equals(getType(), operand.getType());
+        return Objects.equals(getName(), operand.getName()) && Objects.equals(getType(), operand.getType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getSymbol(), getType());
+        return Objects.hash(getName(), getType());
     }
 }

@@ -4,10 +4,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * PermutationProvider implements the Runnable interface which implies that it
+ * can be assigned to thread executor services => Possibility to be paralelly
+ * executed along with other PermuationProviders. The delegate function
+ * represents an interface through which the user can define further operations
+ * to be done on the permutations.
+ */
 class PermutationProvider<T> implements Runnable {
 
     private Function<List<T>, Boolean> delegate;
-    private boolean ignoreElement;
+    private boolean ignoreFirstElement;
     private int nrOfElements;
     private List<T> elements;
     private T ignoredElement;
@@ -18,7 +25,7 @@ class PermutationProvider<T> implements Runnable {
 
     public PermutationProvider(boolean ignoreElement, Function<List<T>, Boolean> delegate) {
         super();
-        this.setIgnoreElement(ignoreElement);
+        this.setIgnoreFirstElement(ignoreElement);
         this.setDelegate(delegate);
     }
 
@@ -48,7 +55,7 @@ class PermutationProvider<T> implements Runnable {
 
     @Override
     public void run() {
-        if (isIgnoreElement()) {
+        if (isIgnoreFirstElement()) {
             // We don't want to return the same list reference at each time, therefore
             // create a new list as soon as we have a permutation.
             permutateIgnoringFirst(nrOfElements, (LinkedList<T>) elements, this.ignoredElement);
@@ -96,12 +103,12 @@ class PermutationProvider<T> implements Runnable {
         this.elements = elements;
     }
 
-    public boolean isIgnoreElement() {
-        return ignoreElement;
+    public boolean isIgnoreFirstElement() {
+        return ignoreFirstElement;
     }
 
-    public void setIgnoreElement(boolean ignoreElement) {
-        this.ignoreElement = ignoreElement;
+    public void setIgnoreFirstElement(boolean ignoreElement) {
+        this.ignoreFirstElement = ignoreElement;
     }
     // #endregion
 }

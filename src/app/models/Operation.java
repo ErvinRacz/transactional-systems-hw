@@ -54,7 +54,7 @@ public class Operation implements Serializable {
 
     @Override
     public String toString() {
-        return "{" + getType().toString().charAt(0) + "" + getTransaction() + "" + getOperand() + "-" + isLive() + "}";
+        return "{" + getType().toString().charAt(0) + "" + getTransaction() + "" + getOperand() + "}";
     }
     // #endregion
 

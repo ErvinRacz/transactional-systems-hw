@@ -1,5 +1,5 @@
 package app.assessor.aspects;
 
-interface Aspect {
+public interface Aspect {
 
 }

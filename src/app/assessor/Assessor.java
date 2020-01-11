@@ -2,7 +2,6 @@ package app.assessor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -11,16 +10,16 @@ import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
-import org.jgrapht.traverse.DepthFirstIterator;
 
+import app.assessor.aspects.Aspect;
 import app.models.Operation;
-import app.models.operands.Operand.Type;
 import app.models.operands.Operand;
+import app.models.operands.Operand.Type;
 import app.models.operands.SymbolicData;
 import app.models.operands.Transaction;
 
 /**
- * Generates step graph.
+ * Generates step graph of a schedule.
  * 
  * @param schedule
  */
@@ -41,6 +40,13 @@ public class Assessor {
         this.setStepGraph(schedule);
     }
 
+    /**
+     * Generate step graph which can be later used to for further analyzing the
+     * schedule.
+     * 
+     * @param schedule
+     * @return
+     */
     private Graph<Operation, DefaultEdge> generateStepGraph(List<Operation> schedule) {
         Graph<Operation, DefaultEdge> g = new Multigraph<>(DefaultEdge.class);
 
@@ -53,7 +59,7 @@ public class Assessor {
             op.setLive(false);
         }
 
-        // adding the initial writes and final reads steps
+        // adding the initial writes and final reads steps (transaction 0 and inifite)
         symbolicDataSet.forEach(data -> {
             g.addVertex(new Operation(Operation.Type.WRITE, data, new Transaction("0")));
             var read = new Operation(Operation.Type.READ, data, new Transaction("oo"));
@@ -62,13 +68,15 @@ public class Assessor {
             schedule.add(read);
         });
 
+        // creating the edges in the step graph
         for (int i = schedule.size() - 1; i >= 1; i--) {
             if (schedule.get(i).getType() == Operation.Type.READ) {
                 for (int j = i - 1; j >= 0; j--) {
                     if (schedule.get(j).getType() == Operation.Type.WRITE
                             && schedule.get(j).getOperand().equals(schedule.get(i).getOperand())) {
                         g.addEdge(schedule.get(j), schedule.get(i));
-                        // we can breake out of the inner for loop
+                        // we can brake out of the for loop since the input of a read operation can be
+                        // only one write operation
                         j = -1;
                     }
                 }
@@ -77,11 +85,17 @@ public class Assessor {
                     if (schedule.get(j).getType() == Operation.Type.READ
                             && schedule.get(j).getTransaction().equals(schedule.get(i).getTransaction())) {
                         g.addEdge(schedule.get(j), schedule.get(i));
+                        // we want to go to the end of the for loop since a write operation might be
+                        // based on multiple read operation
                     }
                 }
             }
         }
         return g;
+    }
+
+    public void assess(Aspect aspect){
+
     }
 
     public void createLiveReadFromRelationList() {
@@ -110,11 +124,11 @@ public class Assessor {
                 do {
                     if (j <= 0) {
                         liveReadFromRelations.add(Triple.of(new Transaction("0"),
-                                schedule.get(i).getOperand().getSymbol(), schedule.get(i).getTransaction()));
+                                schedule.get(i).getOperand().getName(), schedule.get(i).getTransaction()));
                     } else if (schedule.get(j).getType().equals(Operation.Type.WRITE)
                             && schedule.get(j).getOperand().equals(schedule.get(i).getOperand())) {
                         liveReadFromRelations.add(Triple.of(schedule.get(j).getTransaction(),
-                                schedule.get(i).getOperand().getSymbol(), schedule.get(i).getTransaction()));
+                                schedule.get(i).getOperand().getName(), schedule.get(i).getTransaction()));
                         j = -1;
                     }
                     j--;
