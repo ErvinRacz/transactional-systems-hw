@@ -71,8 +71,8 @@ public class App {
         }
 
         var serialSchedules = ScheduleParser.getAllSerialSchedules(schedule);
-
         // #endregion
+
         var serialSchedulesAssessors = serialSchedules.stream().map(s -> new Assessor(new ArrayList<Operation>(s)))
                 .collect(Collectors.toList());
 
@@ -85,11 +85,11 @@ public class App {
             var a = new Assessor(new ArrayList<Operation>(s));
             a.createReadFromRelationList();
             a.createLiveReadFromRelationList();
-            if (a.verifies(new FSR(assessor.getSchedule(), assessor.getLiveReadFromRealations()))) {
+            if (a.verifies(new FSR(serialSchedulesAssessors))) {
                 writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\n");
             }
             var csr = new CSR();
-            if (a.verifies(new VSR(assessor.getSchedule(), assessor.getLiveReadFromRealations())) && a.verifies(csr)) {
+            if (a.verifies(new VSR(serialSchedulesAssessors)) && a.verifies(csr)) {
                 writeTo(fCSR, s.toString() + " - Conflict graph: " + csr.getConflictGraph().toString() + "\n");
             }
             return true;
@@ -115,7 +115,7 @@ public class App {
         // executor.shutdown();
         // executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
         var endTime = System.nanoTime();
-        System.out.println("time (ms): " + (endTime - startTime) / 1000000f);
+        System.out.println("Execution time (ms): " + (endTime - startTime) / 1000000f);
 
         fH.close();
         fCSR.close();
