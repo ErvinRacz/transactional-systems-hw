@@ -1,1 +1,1 @@
-r1x w1y w2y
+r1y w1x r2x r2y w2z r3y w3z

@@ -29,6 +29,7 @@ public class Assessor {
     private Set<SymbolicData> symbolicDataSet;
     private List<Operation> schedule;
     private List<Triple<Operand, String, Operand>> liveReadFromRealations;
+    private List<Triple<Operand, String, Operand>> readFromRealations;
 
     public Assessor() {
         super();
@@ -100,12 +101,17 @@ public class Assessor {
      * @param aspect
      */
     public boolean verifies(Aspect aspect) {
-        return aspect.assess(schedule, stepGraph, liveReadFromRealations);
+        return aspect.assess(schedule, stepGraph, liveReadFromRealations, symbolicDataSet);
     }
 
     public void createLiveReadFromRelationList() {
         findLiveOperations();
-        setLiveReadFromRealations(createReadFromList());
+        setLiveReadFromRealations(createLiveReadFromList());
+    }
+
+    public void createReadFromRelationList() {
+        // findLiveOperations();
+        setReadFromRealations(createReadFromList());
     }
 
     private void findLiveOperations() {
@@ -121,7 +127,7 @@ public class Assessor {
         });
     }
 
-    private ArrayList<Triple<Operand, String, Operand>> createReadFromList() {
+    private ArrayList<Triple<Operand, String, Operand>> createLiveReadFromList() {
         var liveReadFromRelations = new ArrayList<Triple<Operand, String, Operand>>();
         for (int i = 0; i < schedule.size(); i++) {
             if (schedule.get(i).getType().equals(Operation.Type.READ) && schedule.get(i).isLive()) {
@@ -142,6 +148,29 @@ public class Assessor {
         }
 
         return liveReadFromRelations;
+    }
+
+    private ArrayList<Triple<Operand, String, Operand>> createReadFromList() {
+        var readFromRelations = new ArrayList<Triple<Operand, String, Operand>>();
+        for (int i = 0; i < schedule.size(); i++) {
+            if (schedule.get(i).getType().equals(Operation.Type.READ)) {
+                int j = i - 1;
+                do {
+                    if (j <= 0) {
+                        readFromRelations.add(Triple.of(new Transaction("0"), schedule.get(i).getOperand().getName(),
+                                schedule.get(i).getTransaction()));
+                    } else if (schedule.get(j).getType().equals(Operation.Type.WRITE)
+                            && schedule.get(j).getOperand().equals(schedule.get(i).getOperand())) {
+                        readFromRelations.add(Triple.of(schedule.get(j).getTransaction(),
+                                schedule.get(i).getOperand().getName(), schedule.get(i).getTransaction()));
+                        j = -1;
+                    }
+                    j--;
+                } while (j >= 0);
+            }
+        }
+
+        return readFromRelations;
     }
 
     // #region Getters and Setters
@@ -181,5 +210,14 @@ public class Assessor {
     public void setLiveReadFromRealations(List<Triple<Operand, String, Operand>> liveReadFromRealations) {
         this.liveReadFromRealations = liveReadFromRealations;
     }
+
+    public List<Triple<Operand, String, Operand>> getReadFromRealations() {
+        return this.readFromRealations;
+    }
+
+    public void setReadFromRealations(List<Triple<Operand, String, Operand>> readFromRealations) {
+        this.readFromRealations = readFromRealations;
+    }
+
     // #endregion
 }

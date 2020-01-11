@@ -9,15 +9,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import app.assessor.Assessor;
 import app.assessor.aspects.CSR;
 import app.assessor.aspects.FSR;
+import app.assessor.aspects.VSR;
 import app.models.Operation;
 import app.parser.ScheduleParser;
 
@@ -71,18 +69,22 @@ public class App {
         if (!schedule.equals(serialSchedule)) {
             throw new RuntimeException("The schedule has to be provided in a serial form.");
         }
+        
         // #endregion
 
         var assessor = new Assessor(new ArrayList<Operation>(schedule));
         assessor.createLiveReadFromRelationList();
+        assessor.createReadFromRelationList();
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var a = new Assessor(new ArrayList<Operation>(s));
+            a.createReadFromRelationList();
             a.createLiveReadFromRelationList();
             if (a.verifies(new FSR(assessor.getSchedule(), assessor.getLiveReadFromRealations()))) {
                 writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\n");
             }
-            if (a.verifies(new CSR())) {
-                writeTo(fCSR, s.toString() + "\n");
+            var csr = new CSR();
+            if (a.verifies(new VSR(assessor.getSchedule(), assessor.getLiveReadFromRealations())) && a.verifies(csr)) {
+                writeTo(fCSR, s.toString() + " - Conflict graph: " + csr.getConflictGraph().toString() + "\n");
             }
             return true;
         };

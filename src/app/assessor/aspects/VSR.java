@@ -12,11 +12,11 @@ import app.models.operands.Operand;
 import app.models.operands.SymbolicData;
 
 /**
- * Verifies a schedule in regards of final state equivalency. Provide the read
+ * Verifies a schedule in regards of view equivalency. Provide the read
  * from relation set of the first schedule through the constructor for the
  * comparison.
  */
-public class FSR implements Aspect {
+public class VSR implements Aspect {
 
     private List<Operation> scheduleCompareTo;
     private List<Triple<Operand, String, Operand>> lrfCompareTo;
@@ -26,27 +26,27 @@ public class FSR implements Aspect {
      * constructor for the comparison.
      * 
      * @param scheduleCompareTo
-     * @param lrfCompareTo
+     * @param rfCompareTo
      */
-    public FSR(List<Operation> scheduleCompareTo, List<Triple<Operand, String, Operand>> lrfCompareTo) {
+    public VSR(List<Operation> scheduleCompareTo, List<Triple<Operand, String, Operand>> rfCompareTo) {
         this.scheduleCompareTo = scheduleCompareTo;
-        this.lrfCompareTo = lrfCompareTo;
+        this.lrfCompareTo = rfCompareTo;
     }
 
     @Override
     public boolean assess(List<Operation> schedule, Graph<Operation, DefaultEdge> stepGraph,
-            List<Triple<Operand, String, Operand>> lrfSecond, Set<SymbolicData> symbolicDataSet) {
-        return scheduleCompareTo.size() == schedule.size() && lrfCompareTo.size() == lrfSecond.size()
-                && lrfCompareTo.containsAll(lrfSecond);
+            List<Triple<Operand, String, Operand>> rfSecond, Set<SymbolicData> symbolicDataSet) {
+        return scheduleCompareTo.size() == schedule.size() && lrfCompareTo.size() == rfSecond.size()
+                && lrfCompareTo.containsAll(rfSecond);
     }
 
     // #region Getters and setters
 
-    public List<Triple<Operand, String, Operand>> getLrfFirst() {
+    public List<Triple<Operand, String, Operand>> getRfFirst() {
         return this.lrfCompareTo;
     }
 
-    public void setLrfFirst(List<Triple<Operand, String, Operand>> lrfFirst) {
+    public void setRfFirst(List<Triple<Operand, String, Operand>> lrfFirst) {
         this.lrfCompareTo = lrfFirst;
     }
 

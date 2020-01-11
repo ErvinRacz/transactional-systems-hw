@@ -92,8 +92,7 @@ public class ScheduleParser {
     }
 
     /**
-     * Defines a set of transactions by keeping the order of their occurance in the
-     * schedule.
+     * Defines a set of transactions
      * 
      * @param schedule - list of operations
      * @return - Sets don't ensure consistent ordering of the elements, thus we need
