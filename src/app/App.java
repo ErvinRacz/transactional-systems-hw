@@ -1,12 +1,12 @@
 package app;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -16,18 +16,36 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import app.assessor.Assessor;
+import app.assessor.aspects.CSR;
+import app.assessor.aspects.FSR;
 import app.models.Operation;
 import app.parser.ScheduleParser;
 
 public class App {
 
+    private static FileOutputStream fosH, fosCSR;
+    private static DataOutputStream fH, fCSR;
+
     private static String readFile(String path) throws IOException {
         return Files.readString(Paths.get(path));
     }
 
+    private static void writeTo(DataOutputStream output, String str) {
+        try {
+            output.write(str.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws Exception {
 
-        // #region read input
+        fosH = new FileOutputStream("H.txt");
+        fosCSR = new FileOutputStream("CSR.txt");
+        fH = new DataOutputStream(new BufferedOutputStream(fosH));
+        fCSR = new DataOutputStream(new BufferedOutputStream(fosCSR));
+
+        // #region Read input
         String readSerialSchedule = "";
         try {
             readSerialSchedule = readFile("input.txt");
@@ -53,46 +71,24 @@ public class App {
         if (!schedule.equals(serialSchedule)) {
             throw new RuntimeException("The schedule has to be provided in a serial form.");
         }
-
-        var tMinStr = schedule.stream().min(Comparator.comparing(o -> o.getTransaction().getName())).get()
-                .getTransaction().getName();
-        var tMaxStr = schedule.stream().max(Comparator.comparing(o -> o.getTransaction().getName())).get()
-                .getTransaction().getName();
-        var scheduleInforWrapper = new Object() {
-            int minT = 0;
-            int maxT = 0;
-        };
-        try {
-            scheduleInforWrapper.minT = Integer.parseInt(tMinStr);
-            scheduleInforWrapper.maxT = Integer.parseInt(tMaxStr);
-        } catch (NumberFormatException e) {
-            System.out.println("Transaction name is not comparable! Please use integers.");
-            e.printStackTrace();
-        }
         // #endregion
 
-        // var assessor = new Assessor(schedule);
-        var writers = new ArrayList<BufferedWriter>();
-        for (int i = scheduleInforWrapper.minT; i <= scheduleInforWrapper.maxT; i++) {
-            writers.add(new BufferedWriter(new FileWriter("transaction" + i + ".txt", true)));
-            // writers.get(i - 1).flush();
-            writers.get(i - 1).write("SET for transaction " + i + "\n");
-        }
-
+        var assessor = new Assessor(new ArrayList<Operation>(schedule));
+        assessor.createLiveReadFromRelationList();
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var a = new Assessor(new ArrayList<Operation>(s));
             a.createLiveReadFromRelationList();
-            for (int i = scheduleInforWrapper.minT; i <= scheduleInforWrapper.maxT; i++) {
-                try {
-                    writers.get(i - 1).append(s + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            if (a.verifies(new FSR(assessor.getSchedule(), assessor.getLiveReadFromRealations()))) {
+                writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\n");
+            }
+            if (a.verifies(new CSR())) {
+                writeTo(fCSR, s.toString() + "\n");
             }
             return true;
         };
 
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+        // ThreadPoolExecutor executor = (ThreadPoolExecutor)
+        // Executors.newFixedThreadPool(20);
         var startTime = System.nanoTime();
         for (int i = 0; i < schedule.size(); i++) {
             PermutationProvider.swap(schedule, 0, i);
@@ -103,24 +99,17 @@ public class App {
             permutationProvider.setElements(new LinkedList<>(schedule.subList(1, schedule.size())));
             permutationProvider.setNrOfElements(schedule.size() - 1);
             permutationProvider.setIgnoredElement(schedule.get(0));
-            executor.execute(permutationProvider);
+            permutationProvider.run();
+            // executor.execute(permutationProvider);
 
             PermutationProvider.swap(schedule, i, 0);
         }
-        executor.shutdown();
-        executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
+        // executor.shutdown();
+        // executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
         var endTime = System.nanoTime();
+        System.out.println("time (ms): " + (endTime - startTime) / 1000000f);
 
-        // writeFile("output.txt", "Ex. time (ms): " + (endTime - startTime) /
-        // 1000000f);
-
-        writers.forEach(writer -> {
-            try {
-                writer.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        });
+        fH.close();
+        fCSR.close();
     }
 }

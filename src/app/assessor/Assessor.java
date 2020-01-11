@@ -94,8 +94,13 @@ public class Assessor {
         return g;
     }
 
-    public void assess(Aspect aspect){
-
+    /**
+     * Verifies a schedule in regards of a specified aspect.
+     * 
+     * @param aspect
+     */
+    public boolean verifies(Aspect aspect) {
+        return aspect.assess(schedule, stepGraph, liveReadFromRealations);
     }
 
     public void createLiveReadFromRelationList() {
