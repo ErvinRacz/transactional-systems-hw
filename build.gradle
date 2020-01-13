@@ -18,6 +18,9 @@ jar {
                 'Main-Class': 'app.App'
         )
     }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 ext {
    javaMainClass = "app.App"

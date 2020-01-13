@@ -90,12 +90,12 @@ public class App {
             a.createLiveReadFromRelationList();
             // Check the final state serializability of the current permutattion
             if (a.verifies(new FSR(serialSchedulesAssessors))) {
-                writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\n");
+                writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\r\n");
                 count.H++;
             }
             var csr = new CSR();
             if (a.verifies(new VSR(serialSchedulesAssessors)) && a.verifies(csr)) {
-                writeTo(fCSR, s.toString() + " - Conflict graph: " + csr.getConflictGraph().toString() + "\n");
+                writeTo(fCSR, s.toString() + " - Conflict graph: " + csr.getConflictGraph().toString() + "\r\n");
                 count.CSR++;
             }
             return true;
@@ -121,6 +121,8 @@ public class App {
         // executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
         var endTime = System.nanoTime();
         System.out.println("Execution time (ms): " + (endTime - startTime) / 1000000f);
+        System.out.println("H size: " + count.H);
+        System.out.println("CSR size: " + count.CSR);
         fH.close();
         fCSR.close();
     }
