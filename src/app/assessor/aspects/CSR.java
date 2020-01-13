@@ -41,6 +41,7 @@ public class CSR implements Aspect {
                         // add conflict to the graph
                         conflictGraph.addEdge(first, second);
                     } catch (IllegalArgumentException e) {
+                        // not acyclic
                         return false;
                     }
                 }

@@ -13,9 +13,8 @@ import app.models.operands.Operand;
 import app.models.operands.SymbolicData;
 
 /**
- * Verifies a schedule in regards of view equivalency. Provide the read from
- * relation set of the first schedule through the constructor for the
- * comparison.
+ * Verifies a schedule in regards of view equivalency. Compares the subject
+ * schedule to a list of serial schedules through the provided List of Assessors.
  */
 public class VSR implements Aspect {
 

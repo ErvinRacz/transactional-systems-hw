@@ -2,7 +2,6 @@ package app.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,19 +19,9 @@ import app.models.operands.SymbolicData;
 import app.models.operands.Transaction;
 
 /**
- * Schedule parser class which provides a parse function to process strings that
- * meet the follosing conditions: <br/>
- * - operations have to be separated by one character which is called delimiter
- * <br/>
- * - delimiter can be any kind of character that is not used in the notation of
- * an operation <br/>
- * - schedule must contain at least two operations <br/>
- * - the notation of an operation is composed of three caharacters: <br/>
- * 1. type of operation (r, w, a or c - meaning read, write, abort and commit)
- * <br/>
- * 2. transaction that the operation is being part of (must be a number) <br/>
- * 3. operand which has to be a character (either denoting the subjected data or
- * the transaction)
+ * Schedule parser class which provides a parse function to process strings and
+ * convert them into a schedule (List of Operations)
+ * @see Operation
  */
 public class ScheduleParser {
 
@@ -66,7 +53,7 @@ public class ScheduleParser {
     }
 
     /**
-     * TODO: provide description
+     * Converts a String into a list of Operations (schedule)
      * 
      * @param schedule
      * @return
@@ -96,11 +83,10 @@ public class ScheduleParser {
     }
 
     /**
-     * Defines a set of transactions
+     * Extracts the transactions from a schedule 
      * 
-     * @param schedule - list of operations
-     * @return - Sets don't ensure consistent ordering of the elements, thus we need
-     *         to return a list
+     * @param schedule
+     * @return
      */
     public static List<Transaction> extractTransactions(List<Operation> schedule) {
         Set<Transaction> transactionSet = new HashSet<>();
@@ -115,7 +101,8 @@ public class ScheduleParser {
     public static Set<List<Operation>> getAllSerialSchedules(List<Operation> schedule) {
         var serialSchedulesSet = new HashSet<List<Operation>>();
         var serialSchedule = ScheduleParser.extractTransactions(schedule).stream()
-                .map(tr -> schedule.stream().filter(op -> op.getTransaction().equals(tr)).collect(Collectors.toList())).collect(Collectors.toCollection(LinkedList::new));
+                .map(tr -> schedule.stream().filter(op -> op.getTransaction().equals(tr)).collect(Collectors.toList()))
+                .collect(Collectors.toCollection(LinkedList::new));
 
         Function<List<List<Operation>>, Boolean> delegate = (p) -> {
             serialSchedulesSet.add(p.stream().flatMap(List::stream).collect(Collectors.toList()));

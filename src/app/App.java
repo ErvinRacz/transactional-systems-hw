@@ -42,6 +42,9 @@ public class App {
         fosCSR = new FileOutputStream("CSR.txt");
         fH = new DataOutputStream(new BufferedOutputStream(fosH));
         fCSR = new DataOutputStream(new BufferedOutputStream(fosCSR));
+        var count = new Object(){
+            int H = 0, CSR = 0;
+        };
 
         // #region Read input
         String readSerialSchedule = "";
@@ -64,8 +67,6 @@ public class App {
                 .map(tr -> schedule.stream().filter(op -> op.getTransaction().equals(tr))).flatMap(x -> x).distinct()
                 .collect(Collectors.toList());
 
-        // PREMISE! the generated schedules must be distinct. This way we don't have to
-        // save schedules and we can process them parallelly
         if (!schedule.equals(serialSchedule)) {
             throw new RuntimeException("The schedule has to be provided in a serial form.");
         }
@@ -73,6 +74,7 @@ public class App {
         var serialSchedules = ScheduleParser.getAllSerialSchedules(schedule);
         // #endregion
 
+        // Acquire every variation of the original serial schedule
         var serialSchedulesAssessors = serialSchedules.stream().map(s -> new Assessor(new ArrayList<Operation>(s)))
                 .collect(Collectors.toList());
 
@@ -81,22 +83,25 @@ public class App {
             a.createReadFromRelationList();
         });
 
+        // Function which gets executed on each permutation of the schedule. It is passed to the PermutationProvider.
         Function<List<Operation>, Boolean> delegate = (s) -> {
             var a = new Assessor(new ArrayList<Operation>(s));
             a.createReadFromRelationList();
             a.createLiveReadFromRelationList();
+            // Check the final state serializability of the current permutattion
             if (a.verifies(new FSR(serialSchedulesAssessors))) {
                 writeTo(fH, s.toString() + " - LRF: " + a.getLiveReadFromRealations().toString() + "\n");
+                count.H++;
             }
             var csr = new CSR();
             if (a.verifies(new VSR(serialSchedulesAssessors)) && a.verifies(csr)) {
                 writeTo(fCSR, s.toString() + " - Conflict graph: " + csr.getConflictGraph().toString() + "\n");
+                count.CSR++;
             }
             return true;
         };
 
-        // ThreadPoolExecutor executor = (ThreadPoolExecutor)
-        // Executors.newFixedThreadPool(20);
+        // ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
         var startTime = System.nanoTime();
         for (int i = 0; i < schedule.size(); i++) {
             PermutationProvider.swap(schedule, 0, i);
@@ -116,7 +121,6 @@ public class App {
         // executor.awaitTermination(10000, TimeUnit.MILLISECONDS);
         var endTime = System.nanoTime();
         System.out.println("Execution time (ms): " + (endTime - startTime) / 1000000f);
-
         fH.close();
         fCSR.close();
     }

@@ -58,15 +58,20 @@ public class PermutationProvider<T> implements Runnable {
     @Override
     public void run() {
         if (isIgnoreFirstElement()) {
-            // We don't want to return the same list reference at each time, therefore
-            // create a new list as soon as we have a permutation.
             permutateIgnoringFirst(nrOfElements, (LinkedList<T>) elements, this.ignoredElement);
         } else {
-            // same as above here
             permutate(nrOfElements, (LinkedList<T>) elements);
         }
     }
 
+    /**
+     * Swap two element of a list
+     * 
+     * @param <T>
+     * @param input
+     * @param a
+     * @param b
+     */
     public static <T> void swap(List<T> input, int a, int b) {
         final List<T> l = input;
         l.set(a, l.set(b, l.get(a)));
