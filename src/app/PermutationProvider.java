@@ -1,5 +1,6 @@
 package app;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -14,34 +15,25 @@ import java.util.function.Function;
 public class PermutationProvider<T> implements Runnable {
 
     private Function<List<T>, Boolean> delegate;
-    private boolean ignoreFirstElement;
     private int nrOfElements;
     private List<T> elements;
-    private T ignoredElement;
 
     public PermutationProvider() {
         super();
     }
 
-    public PermutationProvider(boolean ignoreElement, Function<List<T>, Boolean> delegate) {
+    public PermutationProvider(Function<List<T>, Boolean> delegate) {
         super();
-        this.setIgnoreFirstElement(ignoreElement);
         this.setDelegate(delegate);
     }
 
-    private void permutate(int n, LinkedList<T> e) {
+    private void permutate(int n, List<T> e) {
         permutateIgnoringFirst(n, e, null);
     }
 
-    private void permutateIgnoringFirst(int n, LinkedList<T> e, T ignoredElement) {
+    private void permutateIgnoringFirst(int n, List<T> e, T ignoredElement) {
         if (n == 1) {
-            if (ignoredElement != null) {
-                e.addFirst(ignoredElement);
-            }
-            delegate.apply(new LinkedList<>(e));
-            if (ignoredElement != null) {
-                e.removeFirst();
-            }
+            delegate.apply(new ArrayList<>(e));
         } else {
             for (int i = 0; i < n - 1; i++) {
                 permutateIgnoringFirst(n - 1, e, ignoredElement);
@@ -57,11 +49,8 @@ public class PermutationProvider<T> implements Runnable {
 
     @Override
     public void run() {
-        if (isIgnoreFirstElement()) {
-            permutateIgnoringFirst(nrOfElements, (LinkedList<T>) elements, this.ignoredElement);
-        } else {
-            permutate(nrOfElements, (LinkedList<T>) elements);
-        }
+        permutate(nrOfElements, elements);
+
     }
 
     /**
@@ -86,14 +75,6 @@ public class PermutationProvider<T> implements Runnable {
         this.delegate = delegate;
     }
 
-    public T getIgnoredElement() {
-        return ignoredElement;
-    }
-
-    public void setIgnoredElement(T ignoredElement) {
-        this.ignoredElement = ignoredElement;
-    }
-
     public int getNrOfElements() {
         return nrOfElements;
     }
@@ -110,12 +91,5 @@ public class PermutationProvider<T> implements Runnable {
         this.elements = elements;
     }
 
-    public boolean isIgnoreFirstElement() {
-        return ignoreFirstElement;
-    }
-
-    public void setIgnoreFirstElement(boolean ignoreElement) {
-        this.ignoreFirstElement = ignoreElement;
-    }
     // #endregion
 }

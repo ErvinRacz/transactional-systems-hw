@@ -65,7 +65,8 @@ public class Operation implements Serializable {
 
     @Override
     public String toString() {
-        return "{" + getType().toString().charAt(0) + "" + getTransaction() + "(" + getOperand() + ")}";
+        return (getType().toString().charAt(0) + "") + getTransaction().getName() + "(" 
+        + getOperand().getName() + ")";
     }
     // #endregion
 
