@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import app.transaction.Operation;
 import app.transaction.Schedule;
@@ -13,7 +14,7 @@ import app.transaction.tgenerator.TransactionGenerator;
 
 public class App {
 
-    private static void writeToPosition(String filename, List<Transaction> data, long position) throws IOException {
+    private static void writeToPosition(String filename, List<Transaction> data) throws IOException {
         FileOutputStream outputStream = new FileOutputStream(filename);
 
         outputStream.write(("COUNT: " + data.size() + "\r\n").getBytes());
@@ -36,7 +37,7 @@ public class App {
         var tset1 = tgen1.generate('1', 2);
         tset1.removeIf(tr -> !tr.isCorrect());
         tset1.forEach(tr -> tr.appendCommit());
-        writeToPosition("N1.txt", tset1, 0);
+        writeToPosition("N1.txt", tset1);
 
         allowedSymbolicDataSet = new HashSet<SymbolicData>();
         allowedSymbolicDataSet.add(new SymbolicData('x'));
@@ -46,7 +47,7 @@ public class App {
         var tset2 = tgen2.generate('2', 3);
         tset2.removeIf(tr -> !tr.isCorrect());
         tset2.forEach(tr -> tr.appendCommit());
-        writeToPosition("N2.txt", tset2, 0);
+        writeToPosition("N2.txt", tset2);
 
         allowedSymbolicDataSet = new HashSet<SymbolicData>();
         allowedSymbolicDataSet.add(new SymbolicData('y'));
@@ -55,7 +56,7 @@ public class App {
         var tset3 = tgen3.generate('3', 2);
         tset3.removeIf(tr -> !tr.isCorrect());
         tset3.forEach(tr -> tr.appendCommit());
-        writeToPosition("N3.txt", tset3, 0);
+        writeToPosition("N3.txt", tset3);
 
         var counter = new Object() {
             int i = 0;
@@ -66,12 +67,22 @@ public class App {
         for (Transaction tA : tset1) {
             for (Transaction tB : tset2) {
                 for (Transaction tC : tset3) {
-                    List<Schedule> shuffleProd1 = tA.shuffleWith(tB);
-                    for (Schedule sch : shuffleProd1) {
-                        var xx = sch.shuffleWith(tC);
-                        counter.i += xx.size();
+                    var first = true;
+                    Set<Schedule> serials;
 
-                        byte[] strToBytes = (xx.toString() + "\r\n").getBytes();
+                    List<Schedule> shuffleProd1 = tA.shuffleWith(tB);
+                    for (Schedule schProd1 : shuffleProd1) {
+                        var scheduleBatch = schProd1.shuffleWith(tC);
+                        counter.i += scheduleBatch.size();
+
+                        if (first) {
+                            serials = scheduleBatch.get(0).getAllSerialSchedules();
+                            first = false;
+                        }
+
+                        
+
+                        byte[] strToBytes = (scheduleBatch.toString() + "\r\n").getBytes();
                         outputStream.write(strToBytes);
                     }
                 }

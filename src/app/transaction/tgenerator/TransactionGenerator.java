@@ -66,10 +66,11 @@ public class TransactionGenerator {
         var ret = new ArrayList<Transaction>();
         transactionVariants.forEach(trAsList -> {
             var transaction = new Transaction(transactionName);
-            trAsList.forEach(op -> {
-                op.setTransaction(transaction);
-                transaction.getOperations().add(op);
-            });
+            transaction.getOperations().addAll(trAsList.stream().map(op -> {
+                var newOp = Operation.copyOf(op);
+                newOp.setTransaction(transaction);
+                return newOp;
+            }).collect(Collectors.toList()));
             ret.add(transaction);
         });
 

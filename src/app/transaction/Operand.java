@@ -27,6 +27,7 @@ public abstract class Operand implements Serializable {
         this.setType(type); 
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Operand> T copyOf(T operandToCopy) {
         switch (operandToCopy.getType()) {
         case SYMBOLIC_DATA:
