@@ -1,6 +1,13 @@
 # Ignore Gradle project-specific cache directory
 .gradle
 
+CSR.txt
+FSR.txt
+H.txt
+N1.txt
+N2.txt
+N3.txt
+
 # Ignore Gradle build output directory
 build
 bin/*
