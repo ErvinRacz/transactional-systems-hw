@@ -98,6 +98,6 @@ public class Schedule implements ShuffleCapable {
         for (Operation operation : operations) {
             sb.append(operation.toString() + " ");
         }
-        return "{ " + sb.toString() + "}";
+        return sb.toString();
     }
 }
