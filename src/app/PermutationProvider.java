@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * PermutationProvider implements the Runnable interface which implies that it
- * can be assigned to thread executor services => Possibility to be paralelly
- * executed along with other PermuationProviders. The delegate function
+ * The delegate function
  * represents an interface through which the user can define further operations
  * to be done on the permutations.
  */
