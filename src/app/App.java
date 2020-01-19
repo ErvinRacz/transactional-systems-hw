@@ -43,7 +43,7 @@ public class App {
         var tset1 = tgen1.generate('1', 2);
         tset1.removeIf(tr -> !tr.isCorrect());
         tset1.forEach(tr -> tr.appendCommit());
-        writeToPosition("N1.txt", tset1);
+        writeToPosition("T1.txt", tset1);
 
         allowedSymbolicDataSet = new HashSet<SymbolicData>();
         allowedSymbolicDataSet.add(new SymbolicData('x'));
@@ -53,7 +53,7 @@ public class App {
         var tset2 = tgen2.generate('2', 3);
         tset2.removeIf(tr -> !tr.isCorrect());
         tset2.forEach(tr -> tr.appendCommit());
-        writeToPosition("N2.txt", tset2);
+        writeToPosition("T2.txt", tset2);
 
         allowedSymbolicDataSet = new HashSet<SymbolicData>();
         allowedSymbolicDataSet.add(new SymbolicData('y'));
@@ -62,7 +62,7 @@ public class App {
         var tset3 = tgen3.generate('3', 2);
         tset3.removeIf(tr -> !tr.isCorrect());
         tset3.forEach(tr -> tr.appendCommit());
-        writeToPosition("N3.txt", tset3);
+        writeToPosition("T3.txt", tset3);
 
         var counter = new Object() {
             int H = 0;
